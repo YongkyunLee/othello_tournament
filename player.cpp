@@ -1,5 +1,7 @@
 #include "player.h"
 
+#define SIZE 8
+
 /* Change:
 Github repository created
 Team Name: Solo
@@ -14,6 +16,17 @@ Member: Yongkyun Lee
 Player::Player(Side side) {
     // Will be set to true in test_minimax.cpp.
     testingMinimax = false;
+    board = new Board();
+
+    my_side = side;
+    if (my_side == BLACK) {
+        opp_side = WHITE;
+    }
+    else {
+        opp_side = BLACK;
+    }
+
+    //need to take an initial move if black
 
     /* 
      * TODO: Do any initialization you need to do here (setting up the board,
@@ -26,6 +39,7 @@ Player::Player(Side side) {
  * Destructor for the player.
  */
 Player::~Player() {
+    delete board;
 }
 
 /*
@@ -41,9 +55,28 @@ Player::~Player() {
  * return NULL.
  */
 Move *Player::doMove(Move *opponentsMove, int msLeft) {
-    /* 
-     * TODO: Implement how moves your AI should play here. You should first
-     * process the opponent's opponents move before calculating your own move
-     */ 
+
+    /*
+    // "Working" AI
+
+    // process opponent's move
+    board->doMove(opponentsMove, opp_side);
+
+    // make the left-top most move
+    for (int i = 0; i < SIZE; i++) {
+        for (int j = 0; j < SIZE; j++) {
+            Move *my_move = new Move(i, j);
+            if (board->checkMove(my_move, my_side)) {
+                board->doMove(my_move, my_side);
+                return my_move;
+            }
+        }
+    }
     return NULL;
+    */
+
+    // Simple Player
+
+    
+
 }
