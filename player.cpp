@@ -21,6 +21,7 @@ Player::Player(Side side) {
     testingMinimax = false;
     board = new Board();
 
+    /*
     // testminimax
     char boardData[64] = {
         ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
@@ -34,6 +35,7 @@ Player::Player(Side side) {
     };
     board->setBoard(boardData);
     // to be erased if not testminimax
+    */
 
     my_side = side;
     if (my_side == BLACK) {
@@ -127,8 +129,10 @@ int Player::minimax(Board *node, int depth, bool max_player) {
 
 }
 
+/*
+ * Working AI and Basic implementation of heuristic function are commented out
+*/
 Move *Player::doMove(Move *opponentsMove, int msLeft) {
-    //usleep(2000000);
     // process opponent's move
     board->doMove(opponentsMove, opp_side);
 
