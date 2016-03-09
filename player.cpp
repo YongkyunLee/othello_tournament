@@ -1,6 +1,9 @@
 #include "player.h"
+#include "limits.h"
+#include <unistd.h>
 
 #define SIZE 8
+#define DEPTH 2
 
 /* Change:
 Github repository created
@@ -17,6 +20,19 @@ Player::Player(Side side) {
     // Will be set to true in test_minimax.cpp.
     testingMinimax = false;
     board = new Board();
+
+    // testminimax
+    char boardData[64] = {
+        ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+        ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 
+        ' ', 'b', ' ', ' ', ' ', ' ', ' ', ' ', 
+        'b', 'w', 'b', 'b', 'b', 'b', ' ', ' ', 
+        ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 
+        ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 
+        ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 
+        ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
+    };
+    board->setBoard(boardData);
 
     my_side = side;
     if (my_side == BLACK) {
@@ -54,14 +70,70 @@ Player::~Player() {
  * The move returned must be legal; if there are no valid moves for your side,
  * return NULL.
  */
+
+/*
+ * Runs 
+ */
+int Player::minimax(Board *node, int depth, bool max_player) {
+    int best_score, curr_score, it;
+    std::vector<Move *> pos_move;
+    // helper to take care of sides
+    Side curr_side;
+    if (DEPTH % 2 == 0) {
+        (depth % 2 == 1) ? curr_side = my_side : curr_side = opp_side;
+    }
+    else {
+        (depth % 2 == 0) ? curr_side = my_side : curr_side = opp_side;
+    }
+
+    if (depth == 0 || !node->hasMoves(curr_side)) { // depth is 0 or the current board has no more possible moves
+        return node->countScore(my_side);
+    }
+
+    if (max_player == true) {
+        best_score = INT_MIN;
+        node->allmoves(pos_move, my_side); // store all the possible movements in pos_move vector
+        for (int i = 0; i < (int)pos_move.size(); i++) {
+            Board *temp = node->copy();
+            temp->doMove(pos_move[i], my_side); // move
+            curr_score = minimax(temp, depth - 1, false);
+            if (curr_score > best_score) {
+                best_score = curr_score;
+                it = i;
+            }
+            delete temp;
+        }
+        if (depth == DEPTH - 1) { // if the decided best score is from the choices of the move that needs to be made
+            next_move = new Move(pos_move[it]->getX(), pos_move[it]->getY());
+        }
+        return best_score;
+    }
+    else { // max_player = false
+        best_score = INT_MAX;
+        node->allmoves(pos_move, opp_side);
+        for (int i = 0; i < (int)pos_move.size(); i++) {
+            Board *temp = node->copy();
+            temp->doMove(pos_move[i], my_side); // move
+            curr_score = minimax(temp, depth - 1, false);
+            if (curr_score < best_score) {
+                best_score = curr_score;
+                it = i;
+            }
+            delete temp;
+        }
+        return best_score;
+    }
+
+}
+
 Move *Player::doMove(Move *opponentsMove, int msLeft) {
-
-    /*
-    // "Working" AI
-
+    //usleep(2000000);
     // process opponent's move
     board->doMove(opponentsMove, opp_side);
 
+    
+    // "Working" AI
+    /*
     // make the left-top most move
     for (int i = 0; i < SIZE; i++) {
         for (int j = 0; j < SIZE; j++) {
@@ -70,13 +142,58 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
                 board->doMove(my_move, my_side);
                 return my_move;
             }
+            else {
+                delete my_move;
+            }
         }
     }
     return NULL;
     */
 
     // Simple Player
+    /*
+    // go through all the squares and check if they have possible moves
+    // then copy board and simulate the move and check the score
+    int curr_score, best_score = INT_MIN;
+    int count = 0;
+    Move *current = new Move(0, 0);
+    Move *best = new Move(0, 0);
+    for (int i = 0; i < SIZE; i++) {
+        for (int j = 0; j < SIZE; j++) {
+            current->setX(i);
+            current->setY(j);
+            if (board->checkMove(current, my_side)) {
+                count++;
+                Board *temp = board->copy();
+                temp->doMove(current, my_side);
+                curr_score = temp->countScore(my_side);
+                if (curr_score > best_score) {
+                    best_score = curr_score;
+                    best->setX(current->getX());
+                    best->setY(current->getY());
+                }
+                delete temp;
+            }
+        }
+    }
+    delete current;
+    if (count == 0) {
+        return NULL;
+    }
+    else {
+        board->doMove(best, my_side);
+        return best;
+    }
+    */
 
-    
+    // Minimax Algorithm
 
+    // use helper function: Player::minimax
+    // the best move at current state is saved at variable next_move
+    if (!board->hasMoves(my_side)) {
+        return NULL;
+    }
+    minimax(board, DEPTH, true);
+    board->doMove(next_move, my_side);
+    return next_move;
 }
