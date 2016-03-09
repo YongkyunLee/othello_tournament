@@ -33,6 +33,7 @@ Player::Player(Side side) {
         ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
     };
     board->setBoard(boardData);
+    // to be erased if not testminimax
 
     my_side = side;
     if (my_side == BLACK) {
@@ -79,7 +80,7 @@ int Player::minimax(Board *node, int depth, bool max_player) {
     std::vector<Move *> pos_move;
     // helper to take care of sides
     Side curr_side;
-    if (DEPTH % 2 == 0) {
+    if (DEPTH % 2 == 1) {
         (depth % 2 == 1) ? curr_side = my_side : curr_side = opp_side;
     }
     else {
@@ -103,21 +104,21 @@ int Player::minimax(Board *node, int depth, bool max_player) {
             }
             delete temp;
         }
-        if (depth == DEPTH - 1) { // if the decided best score is from the choices of the move that needs to be made
+        if (depth == DEPTH) { // if the decided best score is from the choices of the move that needs to be made
             next_move = new Move(pos_move[it]->getX(), pos_move[it]->getY());
         }
+
         return best_score;
     }
-    else { // max_player = false
+    else { // min player
         best_score = INT_MAX;
         node->allmoves(pos_move, opp_side);
         for (int i = 0; i < (int)pos_move.size(); i++) {
             Board *temp = node->copy();
-            temp->doMove(pos_move[i], my_side); // move
+            temp->doMove(pos_move[i], opp_side); // move
             curr_score = minimax(temp, depth - 1, false);
             if (curr_score < best_score) {
                 best_score = curr_score;
-                it = i;
             }
             delete temp;
         }

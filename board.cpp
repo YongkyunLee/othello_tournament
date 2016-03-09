@@ -1,4 +1,5 @@
 #include "board.h"
+#include <iostream>
 
 #define SIZE 8
 #define CENTER 1
@@ -270,7 +271,6 @@ void Board::allmoves(std::vector<Move *> &vec, Side side) {
             if (checkMove(current, side)) {
                 vec.push_back(current);
             }
-            delete current;
         }
     }
 }
