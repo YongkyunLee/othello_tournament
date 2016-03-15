@@ -3,9 +3,9 @@
 
 #define SIZE 8
 #define CENTER 1
-#define CORNER 5
+#define CORNER 10
 #define EDGE 3
-#define DANGER -4
+#define DANGER -6
 
 /*
  * Make a standard 8x8 othello board and initialize it to the standard setup.
@@ -199,21 +199,34 @@ int Board::countCorner(Side side) {
  */
 int Board::countEdge(Side side) {
     int score = 0;
+    Side other;
+    if (side == BLACK) {
+        other = WHITE;
+    }
+    else {
+        other = BLACK;
+    }
     for (int i = 1; i < SIZE - 1; i++) { // top and bottom edges
-        if (i != 1 && i != SIZE - 2) {
+        if (i == 1 || i == SIZE -2) { // (1, 0), (6, 0), (1, 7), (6, 7) are in the danger zone
             if (get(side, i, 0)) {
-                score += EDGE;
+                score += DANGER;
+                if (get(other, 2, 0) || get(other, 3, 0) || get(other, 4, 0) || get(other, 5, 0)) {
+                    score += DANGER;
+                }
             }
             if (get(side, i, SIZE - 1)) {
-                score += EDGE;
+                score += DANGER;
+                if (get(other, 2, SIZE - 1) || get(other, 3, SIZE - 1) || get(other, 4, SIZE - 1) || get(other, 5, SIZE - 1)) {
+                    score += DANGER;
+                }
             }
         }
-        else { // (1, 0), (6, 0), (1, 7), (6, 7) are in the danger zone
+        else {
             if (get(side, i, 0)) {
-                score += DANGER;
+                score += EDGE;
             }
             if (get(side, i, SIZE - 1)) {
-                score += DANGER;
+                score += EDGE;
             }
         }
     }
@@ -233,6 +246,24 @@ int Board::countEdge(Side side) {
             if (get(side, SIZE - 1, j)) {
                 score += DANGER;
             }            
+        }
+    }
+    for (int i = 2; i < SIZE - 2; i++) { // case when the opponent can eat the edge
+        if (get(other, i, i)) {
+            if (get(side, 1, 1)) {
+                score += 1.5 * DANGER;
+            }
+            if (get(side, 6, 6)) {
+                score += 1.5 * DANGER;
+            }
+        }
+        if (get(other, i, SIZE-1-i)) {
+            if (get(side, 6, 1)) {
+                score += 1.5 * DANGER;
+            }
+            if (get(side, 1, 6)) {
+                score += 1.5 * DANGER;
+            }
         }
     }
     return score;

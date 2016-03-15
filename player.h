@@ -23,7 +23,7 @@ private:
 	Side opp_side;
     Board *board;
     vector<int> arr_score;
-    int minimax(Board *node, int depth, bool max_player);
+    int minimax(Board *node, int depth, int alpha, int beta, bool max_player);
     Move * next_move;
 };
 

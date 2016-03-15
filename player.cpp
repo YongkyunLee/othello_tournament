@@ -3,7 +3,7 @@
 #include <unistd.h>
 
 #define SIZE 8
-#define DEPTH 2
+#define DEPTH 5
 
 /* Change:
 Github repository created
@@ -75,9 +75,9 @@ Player::~Player() {
  */
 
 /*
- * Runs 
+ * Updated using alphabeta pruning
  */
-int Player::minimax(Board *node, int depth, bool max_player) {
+int Player::minimax(Board *node, int depth, int alpha, int beta, bool max_player) {
     int best_score, curr_score, it;
     std::vector<Move *> pos_move;
     // helper to take care of sides
@@ -99,10 +99,16 @@ int Player::minimax(Board *node, int depth, bool max_player) {
         for (int i = 0; i < (int)pos_move.size(); i++) {
             Board *temp = node->copy();
             temp->doMove(pos_move[i], my_side); // move
-            curr_score = minimax(temp, depth - 1, false);
+            curr_score = minimax(temp, depth - 1, alpha, beta, false);
             if (curr_score > best_score) {
                 best_score = curr_score;
                 it = i;
+            }
+            if (best_score < alpha) {
+                alpha = best_score;
+            }
+            if (beta <= alpha) {
+                break;
             }
             delete temp;
         }
@@ -118,9 +124,15 @@ int Player::minimax(Board *node, int depth, bool max_player) {
         for (int i = 0; i < (int)pos_move.size(); i++) {
             Board *temp = node->copy();
             temp->doMove(pos_move[i], opp_side); // move
-            curr_score = minimax(temp, depth - 1, false);
+            curr_score = minimax(temp, depth - 1, alpha, beta, false);
             if (curr_score < best_score) {
                 best_score = curr_score;
+            }
+            if (best_score > beta) {
+                beta = best_score;
+            }
+            if (beta <= alpha) {
+                break;
             }
             delete temp;
         }
@@ -198,7 +210,7 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
     if (!board->hasMoves(my_side)) {
         return NULL;
     }
-    minimax(board, DEPTH, true);
+    minimax(board, DEPTH, INT_MIN, INT_MAX, true);
     board->doMove(next_move, my_side);
     return next_move;
 }
